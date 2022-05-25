@@ -1,2 +1,2 @@
 # coupon
-Project for coupon services
+Project for coupon services.
