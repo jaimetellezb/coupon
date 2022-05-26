@@ -121,62 +121,10 @@ public class CouponServiceImpl implements CouponService {
                 // ir suman y comparar con el total
                 tempArr.add(item);
                 // se llama de nuevo el método, utilizando recursividad
-                return combinar2(total, items, tempArr, itemsMinor);
+                return calculateItemsToBuy(total, items, tempArr, itemsMinor);
             }
         }
         return items;
     }
-
-
-    private List<ItemDto> combinar(Float total, List<ItemDto> items, Float sum, List<ItemDto> tempArr) {
-
-        List<ItemDto> res = new ArrayList<>();
-        List<ItemDto> temp = new ArrayList<>();
-        List<ItemDto> iitemp = new ArrayList<>();
-        for (int i = 0; i < items.size(); i++) {
-
-            ItemDto ii = items.get(i);
-            sum += items.get(i).getPrice();
-
-            Double sumt2 = items.stream()
-                    .mapToDouble(ItemDto::getPrice)
-                    .sum();
-            log.info("ITEMS = " + Arrays.toString(items.toArray()));
-            log.info("suma " + sum);
-            log.info("suma2 " + sumt2);
-
-            if (sumt2.floatValue() == total) {
-                //ItemDto itemDto = items.get(i);
-                res.clear();
-                res.addAll(items);
-                log.info("la suma es igual al total" + res.toString());
-                //items.clear();
-                //items.add(itemDto);
-                //return res;
-            }
-
-
-            if (sumt2.floatValue() < total) {
-                log.info("gana por ahora " + items.get(i).getPrice());
-                res.add(items.get(i));
-
-
-            }
-
-            temp = new ArrayList<>();
-            for (int j = i + 1; j < items.size(); j++) {
-                temp.add(items.get(j));
-            }
-
-            iitemp = new ArrayList<>(tempArr);
-            iitemp.add(ii);
-
-
-        }
-        //res = items;
-        log.info("res " + res.toString());
-        return combinar(total, temp, sum, iitemp);
-    }
-
 
 }
