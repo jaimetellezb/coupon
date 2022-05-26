@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +23,6 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public ItemsToBuyResDto itemsToBuy(ItemsToBuyReqDto request) {
         List<ItemDto> items = new ArrayList<>();
-        final Float[] sumTotal = {0f};
-
 
         // revisar si hay items repetidos y quitarlos
         List<String> itemsWithoutDuplicates = request.getItem_ids().stream().distinct().collect(Collectors.toList());
@@ -37,94 +33,56 @@ public class CouponServiceImpl implements CouponService {
                 items.add(item);
             }
         });
+        List<ItemDto>  itemsRes = this.calculateItemsToBuy(request.getAmount(), items, new ArrayList<>(), new ArrayList<>());
+        List<String> itemIds = itemsRes.stream().map(w -> w.getId()).collect(Collectors.toList());
+        Double priceItemsRes = itemsRes.stream().mapToDouble(ItemDto::getPrice).sum();
 
-        List<ItemDto> sortedItemPrice = items.stream().sorted(Comparator.comparingDouble(ItemDto::getPrice))
-                .collect(Collectors.toList());
-
-        List<ItemDto> itms = new ArrayList<>();
-        List<ItemDto> itms2 = new ArrayList<>();
-        itms.add(ItemDto.builder().id("ML1").price(120F).build());
-        itms.add(ItemDto.builder().id("ML2").price(70F).build());
-        itms.add(ItemDto.builder().id("ML3").price(200F).build());
-
-        List<ItemDto> res = this.calculateItemsToBuy(request.getAmount(), itms, itms2, new ArrayList<>());
-        log.info("RES = " + Arrays.toString(res.toArray()));
-
-        return null;
+        return ItemsToBuyResDto.builder().item_ids(itemIds).total(priceItemsRes.floatValue()).build();
     }
 
-    List<ItemDto> calculateItemsToBuy(Float total, List<ItemDto> items, List<ItemDto> tempArr, List<ItemDto> temp) {
-        // recorrer la lista de items
-        for (int i = 0; i < items.size(); i++) {
-            ItemDto item = items.get(i);
-            List<ItemDto> itemsMinor = new ArrayList<>(temp);
-            // se suma el precio de todos los items de la lista
-            Double sumItems = items.stream()
-                    .mapToDouble(ItemDto::getPrice)
-                    .sum();
-            Double sumTempArr = tempArr.stream()
-                    .mapToDouble(ItemDto::getPrice)
-                    .sum();
-            Double sumTemp = temp.stream()
-                    .mapToDouble(ItemDto::getPrice)
-                    .sum();
+    List<ItemDto> calculateItemsToBuy(Float total, List<ItemDto> items, List<ItemDto> nextItemsArr, List<ItemDto> itemsResponse) {
+        Float sumPriceItems = 0F;
+        // se suma el precio de todos los items agregados para validar
+        Double priceNextItems = nextItemsArr.stream()
+                .mapToDouble(ItemDto::getPrice)
+                .sum();
+        // se suma el precio de todos los items de la lista de respueta
+        Double priceItemsRes = itemsResponse.stream()
+                .mapToDouble(ItemDto::getPrice)
+                .sum();
+        sumPriceItems = priceNextItems.floatValue();
 
-            // si la suma de los items es igual a el total, retorna
-            // la lista de items que estén
-            if (sumItems.floatValue() == total.floatValue()) {
-                return items;
-            }
-            // si la lista de tempArr es igual al total, retorna
-            // toda la lista
-            if (sumTempArr.floatValue() == total.floatValue()) {
-                return tempArr;
-            }
-
-            // si alguno de los items tiene el mismo precio del total, retorna
-            if (item.getPrice().floatValue() == total.floatValue()) {
-                ///////////////////////////////////////
-                // se limpia el arreglo
-                items.clear();
-                // se agrega el item actual
-                items.add(item);
-                // retorna la lista con el item agregado
-                return items;
-            }
-
-            if (item.getPrice().floatValue() > sumTemp.floatValue() && item.getPrice().floatValue() <= total.floatValue()) {
-                itemsMinor.clear();
-                itemsMinor.add(item);
-
-            }
-
-            // poner cuidado a esta validación
-            // mejorarlas
-            if (sumItems.floatValue() > sumTempArr.floatValue() && sumItems.floatValue() < total.floatValue()) {
-                itemsMinor.clear();
-                itemsMinor.addAll(items);
-            } else if (sumTempArr.floatValue() < total.floatValue() && sumTempArr.floatValue() > sumTemp.floatValue()) {
-                itemsMinor.clear();
-                itemsMinor.addAll(tempArr);
-            }
-
-            if (sumTempArr.floatValue() > total.floatValue() && sumTemp.floatValue() < total.floatValue() && sumTemp.floatValue() > 0) {
-                return temp;
-            }
-
-            // valida siempre que la suma de los precios de items
-            // sea diferente al total o monto ingresado
-            if (sumItems.floatValue() != total.floatValue() && sumTempArr.floatValue() != total.floatValue()) {
-                // se elimina el item actual de la lista de items
-                // para iterar con el siguiente item en la lista
-                items.remove(item);
-                // se agrega el item en la lista de tempArr para
-                // ir suman y comparar con el total
-                tempArr.add(item);
-                // se llama de nuevo el método, utilizando recursividad
-                return calculateItemsToBuy(total, items, tempArr, itemsMinor);
+        // si la suma de los items es igual a el total, agrega
+        // la lista de nextItemsArr a la de respuesta
+        if (sumPriceItems.floatValue() == total.floatValue()) {
+            itemsResponse.clear();
+            itemsResponse.addAll(nextItemsArr);
+        } else if (sumPriceItems.floatValue() <= total.floatValue() && sumPriceItems.floatValue() > priceItemsRes.floatValue()) {
+            // si la suma de los items es menor o igual al monto y la suma es mayor a la suma del arreglo de resta
+            // se agrega el arreglo actual al arreglo de respuesta
+            itemsResponse.clear();
+            itemsResponse.addAll(nextItemsArr);
+        } else if (sumPriceItems.floatValue() < total.floatValue()) {
+            // se ejecuta el ciclo siempre y cuando el  precio de los items sea menor al monto ingresado
+            // recorrer la lista de items
+            for (int i = 0; i < items.size(); i++) {
+                ItemDto item = items.get(i);
+                // valida siempre que la suma de los precios de items
+                // sea diferente al total o monto ingresado
+                if (sumPriceItems.floatValue() != total.floatValue()) {
+                    List<ItemDto> itemsTemp = new ArrayList<>(items);
+                    // se elimina el item actual de la lista de items
+                    // para iterar con el siguiente item en la lista
+                    itemsTemp.remove(itemsTemp.get(i));
+                    List<ItemDto> nextItems = new ArrayList<>(nextItemsArr);
+                    // se agrega el item actual en la lista que tiene las nuevas iteraciones
+                    nextItems.add(item);
+                    // se llama de nuevo el método, utilizando recursividad
+                    calculateItemsToBuy(total, itemsTemp, nextItems, itemsResponse);
+                }
             }
         }
-        return items;
+        return itemsResponse;
     }
 
 }
