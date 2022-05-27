@@ -26,7 +26,7 @@ public class CouponServiceImpl implements CouponService {
 
         // revisar si hay items repetidos y quitarlos
         List<String> itemsWithoutDuplicates = request.getItem_ids().stream().distinct().collect(Collectors.toList());
-        itemsWithoutDuplicates.stream().forEach(element -> {
+        itemsWithoutDuplicates.parallelStream().forEach(element -> {
             // consumir servicio de mercado libre para obtener precio de item
             ItemDto item = itemService.getItemPrice(element);
             if (item.getPrice() < request.getAmount()) {
