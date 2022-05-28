@@ -1,8 +1,8 @@
 package com.meli.coupon.application.service;
 
+import com.meli.coupon.application.dto.ItemsToBuyRequest;
+import com.meli.coupon.application.dto.ItemsToBuyResponse;
 import com.meli.coupon.domain.model.Item;
-import com.meli.coupon.application.dto.ItemsToBuyReq;
-import com.meli.coupon.application.dto.ItemsToBuyRes;
 import com.meli.coupon.domain.rest.ItemRestApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,62 +17,59 @@ import java.util.stream.Collectors;
 public class CouponService {
 
     @Autowired
-    private ItemRestApi itemService;
+    private ItemRestApi itemRestApi;
 
-    public ItemsToBuyRes getItemsToBuy(ItemsToBuyReq request) {
-        List<Item> items = new ArrayList<>();
+    public ItemsToBuyResponse getItemsToBuy(ItemsToBuyRequest request) {
+        log.info(request.toString());
+        List<Item> itemsToValidate = new ArrayList<>();
 
-        // revisar si hay items repetidos y quitarlos
         List<String> itemsWithoutDuplicates = request.getItem_ids().stream().distinct().collect(Collectors.toList());
+        log.debug("Items Ids to validate ".concat(itemsWithoutDuplicates.toString()));
         itemsWithoutDuplicates.stream().forEach(element -> {
             // consumir servicio de mercado libre para obtener precio de item
-            Item item = itemService.getItemPrice(element);
-            if (item.getPrice() < request.getAmount()) {
-                items.add(item);
+            Item item = itemRestApi.getItemPrice(element);
+            if (item.getPrice() <= request.getAmount()) {
+                itemsToValidate.add(item);
             }
         });
-        List<Item>  itemsRes = this.calculateItemsToBuy(request.getAmount(), items, new ArrayList<>(), new ArrayList<>());
-        List<String> itemIds = itemsRes.stream().map(w -> w.getId()).collect(Collectors.toList());
-        Double priceItemsRes = itemsRes.stream().mapToDouble(Item::getPrice).sum();
+        List<Item> itemsRes = this.calculateItemsToBuy(request.getAmount(), itemsToValidate, new ArrayList<>(), new ArrayList<>());
+        List<String> itemIds = itemsRes.stream().map(Item::getId).collect(Collectors.toList());
+        Double priceItemsResponse = itemsRes.stream().mapToDouble(Item::getPrice).sum();
 
-        return ItemsToBuyRes.builder().item_ids(itemIds).total(priceItemsRes.floatValue()).build();
+        ItemsToBuyResponse itemsToBuyResponse = ItemsToBuyResponse.builder().item_ids(itemIds).total(priceItemsResponse.floatValue()).build();
+        log.info(itemsToBuyResponse.toString());
+        return itemsToBuyResponse;
     }
 
-    List<Item> calculateItemsToBuy(Float total, List<Item> items, List<Item> nextItemsArr, List<Item> itemsResponse) {
-        Float sumPriceItems = 0F;
-        // se suma el precio de todos los items agregados para validar
-        Double priceNextItems = nextItemsArr.stream()
+    List<Item> calculateItemsToBuy(Float total, List<Item> itemsToValidate, List<Item> nextItemList, List<Item> itemsResponse) {
+        // se suma el precio de todos los itemsToValidate agregados para validar
+        Double priceNextItems = nextItemList.stream()
                 .mapToDouble(Item::getPrice)
                 .sum();
-        // se suma el precio de todos los items de la lista de respueta
+        // se suma el precio de todos los itemsToValidate de la lista de respueta
         Double priceItemsRes = itemsResponse.stream()
                 .mapToDouble(Item::getPrice)
                 .sum();
-        sumPriceItems = priceNextItems.floatValue();
+        Float sumPriceItems = priceNextItems.floatValue();
 
-        // si la suma de los items es igual a el total, agrega
-        // la lista de nextItemsArr a la de respuesta
-        if (sumPriceItems.floatValue() == total.floatValue()) {
+        // si la suma de los itemsToValidate es menor o igual al total y es mayor a la suma del arreglo de respuesta temporal
+        // la lista de nextItemList a la de respuesta
+        if (sumPriceItems.floatValue() <= total.floatValue() && sumPriceItems.floatValue() > priceItemsRes.floatValue()) {
             itemsResponse.clear();
-            itemsResponse.addAll(nextItemsArr);
-        } else if (sumPriceItems.floatValue() <= total.floatValue() && sumPriceItems.floatValue() > priceItemsRes.floatValue()) {
-            // si la suma de los items es menor o igual al monto y la suma es mayor a la suma del arreglo de resta
-            // se agrega el arreglo actual al arreglo de respuesta
-            itemsResponse.clear();
-            itemsResponse.addAll(nextItemsArr);
+            itemsResponse.addAll(nextItemList);
         } else if (sumPriceItems.floatValue() < total.floatValue()) {
-            // se ejecuta el ciclo siempre y cuando el  precio de los items sea menor al monto ingresado
-            // recorrer la lista de items
-            for (int i = 0; i < items.size(); i++) {
-                Item item = items.get(i);
-                // valida siempre que la suma de los precios de items
+            // se ejecuta el ciclo siempre y cuando el  precio de los itemsToValidate sea menor al monto ingresado
+            // recorrer la lista de itemsToValidate
+            for (int i = 0; i < itemsToValidate.size(); i++) {
+                Item item = itemsToValidate.get(i);
+                // valida siempre que la suma de los precios de itemsToValidate
                 // sea diferente al total o monto ingresado
                 if (sumPriceItems.floatValue() != total.floatValue()) {
-                    List<Item> itemsTemp = new ArrayList<>(items);
-                    // se elimina el item actual de la lista de items
+                    List<Item> itemsTemp = new ArrayList<>(itemsToValidate);
+                    // se elimina el item actual de la lista de itemsToValidate
                     // para iterar con el siguiente item en la lista
                     itemsTemp.remove(itemsTemp.get(i));
-                    List<Item> nextItems = new ArrayList<>(nextItemsArr);
+                    List<Item> nextItems = new ArrayList<>(nextItemList);
                     // se agrega el item actual en la lista que tiene las nuevas iteraciones
                     nextItems.add(item);
                     // se llama de nuevo el método, utilizando recursividad

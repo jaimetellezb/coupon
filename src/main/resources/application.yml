@@ -1,1 +1,3 @@
-
+api:
+  items:
+    url: ${API_ITEMS_URL}

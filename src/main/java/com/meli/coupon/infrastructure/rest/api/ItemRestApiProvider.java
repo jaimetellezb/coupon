@@ -4,6 +4,7 @@ import com.meli.coupon.domain.model.Item;
 import com.meli.coupon.domain.rest.ItemRestApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,11 +12,16 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class ItemRestApiProvider implements ItemRestApi {
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private Environment environment;
 
     @Override
     public Item getItemPrice(String itemId) {
-        Item item = restTemplate.getForObject("https://api.mercadolibre.com/items/" + itemId, Item.class);
-        return item;
+        log.debug("Request Item API ".concat(itemId));
+        Item itemApiResponse = restTemplate.getForObject(environment.getProperty("api.items.url") + itemId, Item.class);
+        log.debug("Response Item API ".concat(String.valueOf(itemApiResponse)));
+        return  itemApiResponse;
     }
 }
