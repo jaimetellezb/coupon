@@ -1,6 +1,6 @@
-package com.meli.coupon.infrastructure.dto;
+package com.meli.coupon.infrastructure.rest.dto;
 
-import com.meli.coupon.domain.dto.ItemDto;
+import com.meli.coupon.domain.model.Item;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MeliApiResponse {
+public class ItemRestApiResponse {
     private int code;
-    private ItemDto body;
+    private Item body;
 }

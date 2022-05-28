@@ -1,8 +1,8 @@
-package com.meli.coupon.application;
+package com.meli.coupon.infrastructure.http.controller;
 
-import com.meli.coupon.domain.dto.ItemsToBuyReqDto;
-import com.meli.coupon.domain.dto.ItemsToBuyResDto;
-import com.meli.coupon.domain.ports.inbound.CouponService;
+import com.meli.coupon.application.service.CouponService;
+import com.meli.coupon.application.dto.ItemsToBuyReq;
+import com.meli.coupon.application.dto.ItemsToBuyRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,8 @@ public class CouponController {
     private CouponService couponService;
 
     @PostMapping
-    public ResponseEntity<ItemsToBuyResDto> itemsToBuy(@Valid @RequestBody ItemsToBuyReqDto request) {
-        return new ResponseEntity<>(couponService.itemsToBuy(request),
+    public ResponseEntity<ItemsToBuyRes> getItemsToBuy(@Valid @RequestBody ItemsToBuyReq request) {
+        return new ResponseEntity<>(couponService.getItemsToBuy(request),
                 HttpStatus.OK);
     }
 }

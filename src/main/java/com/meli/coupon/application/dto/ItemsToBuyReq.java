@@ -1,4 +1,4 @@
-package com.meli.coupon.domain.dto;
+package com.meli.coupon.application.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,11 +6,11 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ItemsToBuyReqDto extends ItemsToBuyDto {
+public class ItemsToBuyReq extends ItemsToBuy {
     private final float amount;
 
     @Builder
-    public ItemsToBuyReqDto(List<String> item_ids, float amount) {
+    public ItemsToBuyReq(List<String> item_ids, float amount) {
         super(item_ids);
         this.amount = amount;
     }

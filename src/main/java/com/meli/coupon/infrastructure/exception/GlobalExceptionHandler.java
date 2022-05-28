@@ -1,6 +1,6 @@
-package com.meli.coupon.domain.exception;
+package com.meli.coupon.infrastructure.exception;
 
-import com.meli.coupon.domain.dto.ErrorDetail;
+import com.meli.coupon.infrastructure.rest.dto.ErrorDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

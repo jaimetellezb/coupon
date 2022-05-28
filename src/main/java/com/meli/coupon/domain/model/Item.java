@@ -1,4 +1,4 @@
-package com.meli.coupon.domain.dto;
+package com.meli.coupon.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ItemDto {
+public class Item {
     private String id;
     private Float price;
 }

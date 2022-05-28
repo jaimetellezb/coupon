@@ -1,4 +1,4 @@
-package com.meli.coupon.domain.dto;
+package com.meli.coupon.infrastructure.rest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
