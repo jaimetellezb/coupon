@@ -1,14 +1,18 @@
 package com.meli.coupon.application.dto;
 
+import java.util.List;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @ToString(callSuper = true)
 public class ItemsToBuyRequest extends ItemsToBuy {
+
+    @NotNull
+    @Min(1)
     private final float amount;
 
     @Builder
