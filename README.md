@@ -11,6 +11,8 @@ Se construye API REST que contiene 2 endpoints:
     ```
     API_ITEMS_URL=<url_mercadolibre>
     MYSQL_HOST=<localhost>
+    MYSQL_PORT=<port_mysql>
+    MYSQL_DB=<database_name>
     MYSQL_USER=<user>
     MYSQL_PWD=<password>
     ```
