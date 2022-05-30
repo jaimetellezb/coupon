@@ -36,6 +36,15 @@ java {
 	sourceCompatibility = JavaVersion.toVersion("11")
 	targetCompatibility = JavaVersion.toVersion("11")
 }
+jar {
+	manifest {
+		attributes(
+
+				'Main-Class': 'com.meli.coupon.CouponApplication'
+		)
+	}
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
