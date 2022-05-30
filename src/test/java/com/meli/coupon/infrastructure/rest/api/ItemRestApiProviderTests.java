@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(classes = CouponApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {"api.items.url=http://localhost:8080/items"})
-public class ItemRestApiProviderTests {
+class ItemRestApiProviderTests {
 
     @InjectMocks
     private ItemRestApiProvider itemRestApiProvider;

@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.meli'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '8'
 
 configurations {
 	compileOnly {
@@ -30,6 +30,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 	testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+java {
+	sourceCompatibility = JavaVersion.toVersion("8")
+	targetCompatibility = JavaVersion.toVersion("8")
 }
 
 tasks.named('test') {
