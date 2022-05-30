@@ -11,5 +11,6 @@ class CouponApplicationTests {
 
     @Test
     void contextLoads() {
+
     }
 }

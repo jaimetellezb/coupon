@@ -5,14 +5,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meli.coupon.CouponApplication;
 import com.meli.coupon.application.dto.ItemsToBuyRequest;
 import com.meli.coupon.application.service.CouponService;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -21,11 +24,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = CouponApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 class CouponControllerTests {
-
-    private static final ObjectMapper om = new ObjectMapper();
 
     @LocalServerPort
     int randomServerPort;
@@ -36,14 +40,21 @@ class CouponControllerTests {
     @MockBean
     private CouponService service;
 
-    @Test
-    void ItemsToBuyOk() {
 
+    @BeforeEach
+    public void init() {
+
+    }
+
+
+    @Test
+    void itemsToBuyOk() throws Exception {
         List<String> ids = Arrays.asList(
             "ML1",
             "ML2",
             "ML3"
         );
+
         ItemsToBuyRequest request = new ItemsToBuyRequest(ids, 500F);
 
         ResponseEntity<String> response = this.testRestTemplate.postForEntity("/coupon/", request, String.class);
@@ -53,7 +64,16 @@ class CouponControllerTests {
     }
 
     @Test
-    void ItemsToBuyNotFoundUrl() {
+    void getFavoriteItemsOk() {
+
+        ResponseEntity<String> response = this.testRestTemplate.getForEntity("/coupon/favorites?limit=5", String.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service, times(1)).getFavoriteItems(any(Integer.class));
+    }
+
+    @Test
+    void itemsToBuyNotFoundUrl() {
 
         List<String> ids = Arrays.asList("ML1", "ML2", "ML3");
         ItemsToBuyRequest request = new ItemsToBuyRequest(ids, 500F);
@@ -69,7 +89,7 @@ class CouponControllerTests {
     }
 
     @Test
-    void ItemsToBuyBadRequest() {
+    void itemsToBuyBadRequest() {
 
         List<String> ids = Arrays.asList("ML1", "ML2");
         ItemsToBuyRequest newBook = new ItemsToBuyRequest(ids, 0F);

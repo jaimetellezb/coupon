@@ -1,12 +1,10 @@
 package com.meli.coupon.domain.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class FavoriteItem {
 
     private Long id;

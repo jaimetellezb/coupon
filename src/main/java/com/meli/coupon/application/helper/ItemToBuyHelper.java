@@ -3,12 +3,11 @@ package com.meli.coupon.application.helper;
 import com.meli.coupon.infrastructure.rest.dto.Item;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class ItemToBuyHelper {
 
-    private ItemToBuyHelper() {
-        throw new IllegalStateException("ItemToBuyHelper class");
-    }
     public static List<Item> calculateItemsToBuy(Float total, List<Item> itemsToValidate, List<Item> nextItemList,
         List<Item> itemsResponse) {
         // se suma el precio de todos los itemsToValidate agregados para validar
