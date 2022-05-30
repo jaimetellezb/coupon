@@ -167,8 +167,8 @@ Después de levantar la app, ingresar a la url: http://localhost:8080/swagger-ui
 * Precio de items: https://api.mercadolibre.com/items/
 
 ### HEROKU
-* Items a comprar: http://localhost:8080/coupon
-* Items favoritos: http://localhost:8080/coupon/favorites?limit=5
+* Items a comprar: https://coupons-app.herokuapp.com/coupon
+* Items favoritos: https://coupons-app.herokuapp.com/coupon/favorites?limit=5
 * Precio de items: https://api.mercadolibre.com/items/
 
 **NOTA:** Con Heroku en la cuenta gratuita cuando no se usa el servicio por más de 30 minutos, apagan la instancia, luego cuando se hace una petición se vuelve a encender y se demora alrededor de un minuto en estar disponible.
