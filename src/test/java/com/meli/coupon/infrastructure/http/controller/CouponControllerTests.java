@@ -55,17 +55,16 @@ class CouponControllerTests {
     @Test
     void ItemsToBuyNotFoundUrl() {
 
-        List<String> ids = Arrays.asList("ML1","ML2", "ML3");
+        List<String> ids = Arrays.asList("ML1", "ML2", "ML3");
         ItemsToBuyRequest request = new ItemsToBuyRequest(ids, 500F);
-        String baseUrl = "http://localhost:"+randomServerPort+"/coupon2/";
-
+        String baseUrl = "http://localhost:" + randomServerPort + "/coupon2/";
 
         HttpHeaders headers = new HttpHeaders();
 
         HttpEntity<ItemsToBuyRequest> entity = new HttpEntity<ItemsToBuyRequest>(request, headers);
 
-        ResponseEntity<String> responseService = this.testRestTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class);
-        System.out.println(responseService.getBody());
+        ResponseEntity<String> responseService = this.testRestTemplate.exchange(baseUrl, HttpMethod.POST, entity,
+            String.class);
         assertEquals(HttpStatus.NOT_FOUND, responseService.getStatusCode());
     }
 

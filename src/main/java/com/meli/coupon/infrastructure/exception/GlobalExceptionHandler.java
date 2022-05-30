@@ -36,12 +36,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class})
-    protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
-        log.error(ex.getMessage());
-        return new ResponseEntity<>(new ErrorDetail(new Date(), "Conflict", ex.getMessage()), HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler(HttpClientErrorException.NotFound.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ResponseEntity<Object> handleNoSuchElementFoundException(

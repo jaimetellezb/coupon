@@ -1,16 +1,16 @@
 package com.meli.coupon.application.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-
 
 import com.meli.coupon.application.dto.ItemsToBuyRequest;
 import com.meli.coupon.application.dto.ItemsToBuyResponse;
-import com.meli.coupon.infrastructure.rest.dto.Item;
+import com.meli.coupon.application.helper.ItemToBuyHelper;
 import com.meli.coupon.domain.rest.ItemRestApi;
+import com.meli.coupon.infrastructure.rest.dto.Item;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,11 +51,13 @@ class CouponServiceTests {
         });
 
         // execute calculate items to buy
-        List<Item> expectedItems = couponService.calculateItemsToBuy(total, items, new ArrayList<>(), new ArrayList<>());
+        List<Item> expectedItems = ItemToBuyHelper.calculateItemsToBuy(total, items, new ArrayList<>(),
+            new ArrayList<>());
         Double totalPrice = expectedItems.stream().mapToDouble(Item::getPrice).sum();
 
         // Execute result
-        ItemsToBuyRequest request = new ItemsToBuyRequest(items.stream().map(Item::getId).collect(Collectors.toList()), total);
+        ItemsToBuyRequest request = new ItemsToBuyRequest(items.stream().map(Item::getId).collect(Collectors.toList()),
+            total);
         ItemsToBuyResponse itemsToBuy = couponService.getItemsToBuy(request);
 
         // Asserts
