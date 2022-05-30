@@ -2,10 +2,16 @@ package com.meli.coupon.application.service;
 
 import com.meli.coupon.application.dto.ItemsToBuyRequest;
 import com.meli.coupon.application.dto.ItemsToBuyResponse;
-import com.meli.coupon.infrastructure.rest.dto.Item;
+import com.meli.coupon.application.helper.ItemToBuyHelper;
+import com.meli.coupon.domain.model.FavoriteItem;
+import com.meli.coupon.domain.repository.FavoriteItemRepository;
 import com.meli.coupon.domain.rest.ItemRestApi;
+import com.meli.coupon.infrastructure.rest.dto.Item;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +23,9 @@ public class CouponService {
 
     @Autowired
     private ItemRestApi itemRestApi;
+
+    @Autowired
+    private FavoriteItemRepository favoriteItemRepository;
 
     public ItemsToBuyResponse getItemsToBuy(ItemsToBuyRequest request) {
         log.info(request.toString());
@@ -31,51 +40,33 @@ public class CouponService {
                 itemsToValidate.add(item);
             }
         });
-        List<Item> itemsRes = this.calculateItemsToBuy(request.getAmount(), itemsToValidate, new ArrayList<>(),
+        List<Item> itemsRes = ItemToBuyHelper.calculateItemsToBuy(request.getAmount(), itemsToValidate,
+            new ArrayList<>(),
             new ArrayList<>());
         List<String> itemIds = itemsRes.stream().map(Item::getId).collect(Collectors.toList());
         Double priceItemsResponse = itemsRes.stream().mapToDouble(Item::getPrice).sum();
 
         ItemsToBuyResponse itemsToBuyResponse = ItemsToBuyResponse.builder().item_ids(itemIds)
             .total(priceItemsResponse.floatValue()).build();
+
+        favoriteItemRepository.saveUpdateFavoriteItems(itemsToBuyResponse.getItem_ids());
         log.info(itemsToBuyResponse.toString());
         return itemsToBuyResponse;
     }
 
-    public List<Item> calculateItemsToBuy(Float total, List<Item> itemsToValidate, List<Item> nextItemList,
-        List<Item> itemsResponse) {
-        // se suma el precio de todos los itemsToValidate agregados para validar
-        Double priceNextItems = nextItemList.stream().mapToDouble(Item::getPrice).sum();
-        // se suma el precio de todos los itemsToValidate de la lista de respueta
-        Double priceItemsRes = itemsResponse.stream().mapToDouble(Item::getPrice).sum();
-        Float sumPriceItems = priceNextItems.floatValue();
+    public List<Map<String, Integer>> getFavoriteItems(Integer limit) {
+        log.info("Request: limit=" + limit);
+        Map<String, Integer> favoritesMap = new HashMap<>();
+        List<FavoriteItem> favoriteItems = favoriteItemRepository.getFavoriteItems(limit);
 
-        // si la suma de los itemsToValidate es menor o igual al total y es mayor a la suma del arreglo
-        // de respuesta
-        if (sumPriceItems.floatValue() <= total.floatValue()
-            && sumPriceItems.floatValue() > priceItemsRes.floatValue()) {
-            itemsResponse.clear();
-            itemsResponse.addAll(nextItemList);
-        } else if (sumPriceItems.floatValue() < total.floatValue()) {
-            // se ejecuta el ciclo siempre y cuando el  precio de los itemsToValidate sea menor al monto
-            // ingresado
-            for (int i = 0; i < itemsToValidate.size(); i++) {
-                Item item = itemsToValidate.get(i);
-                // valida siempre que la suma de los precios de itemsToValidate
-                // sea diferente al total o monto ingresado
-                if (sumPriceItems.floatValue() != total.floatValue()) {
-                    List<Item> itemsTemp = new ArrayList<>(itemsToValidate);
-                    // se elimina el item actual de la lista de itemsToValidate
-                    // para iterar con el siguiente item en la lista
-                    itemsTemp.remove(itemsTemp.get(i));
-                    List<Item> nextItems = new ArrayList<>(nextItemList);
-                    // se agrega el item actual en la lista que tiene las nuevas iteraciones
-                    nextItems.add(item);
-                    // se llama de nuevo el método, utilizando recursividad
-                    calculateItemsToBuy(total, itemsTemp, nextItems, itemsResponse);
-                }
-            }
-        }
-        return itemsResponse;
+        favoriteItems.stream().forEach(item -> favoritesMap.put(item.getItem(), item.getQuantity()));
+        Map<String, Integer> favoritesMapReversed = new LinkedHashMap<>();
+        favoritesMap.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .forEachOrdered(x -> favoritesMapReversed.put(x.getKey(), x.getValue()));
+        List<Map<String, Integer>> favoritesResponse = new ArrayList<>();
+        favoritesResponse.add(favoritesMapReversed);
+        log.info("Response: Items=" + favoritesResponse);
+        return favoritesResponse;
     }
 }

@@ -1,7 +1,7 @@
 package com.meli.coupon.infrastructure.rest.api;
 
-import com.meli.coupon.infrastructure.rest.dto.Item;
 import com.meli.coupon.domain.rest.ItemRestApi;
+import com.meli.coupon.infrastructure.rest.dto.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

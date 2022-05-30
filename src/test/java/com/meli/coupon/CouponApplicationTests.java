@@ -8,7 +8,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CouponApplicationTests {
+
     @Test
-    void contextLoads()  {
+    void contextLoads() {
+
     }
 }
