@@ -88,7 +88,7 @@ class CouponServiceTests {
         // Execute result
         List<Map<String, Integer>> favorites = couponService.getFavoriteItems(limit);
         // Asserts
-        assertEquals(favorites.size(), 1);
+        assertEquals(1, favorites.size());
         verify(favoriteItemRepository, times(1)).getFavoriteItems(limit);
     }
 
